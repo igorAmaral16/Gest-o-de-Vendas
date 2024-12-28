@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogTitle, Snackbar, Alert, TextField } from '@mui/material';
+import { Button, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Dialog, DialogActions, DialogContent, DialogTitle, Snackbar, Alert, TextField, Box, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
 import { obterVendasPendentes, atualizarVendaNoFirebase } from '../firebase/firebaseService';
 
 const AbaterVenda = () => {
   const [vendasPendentes, setVendasPendentes] = useState([]);
-  const [selectedVenda, setSelectedVenda] = useState(null); // Venda selecionada para abater
-  const [valorAbatido, setValorAbatido] = useState(''); // Valor a ser abatido
-  const [error, setError] = useState(''); // Erro ao abater
-  const [openSnackbar, setOpenSnackbar] = useState(false); // Controle do Snackbar de sucesso
-  const [snackbarMessage, setSnackbarMessage] = useState(''); // Mensagem do Snackbar
-  const [snackbarSeverity, setSnackbarSeverity] = useState('success'); // Controle da cor do Snackbar
+  const [selectedVenda, setSelectedVenda] = useState(null);
+  const [valorAbatido, setValorAbatido] = useState('');
+  const [error, setError] = useState('');
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortOption, setSortOption] = useState(''); // Novo estado para a opção de ordenação
 
   useEffect(() => {
     const fetchVendasPendentes = async () => {
@@ -26,7 +28,7 @@ const AbaterVenda = () => {
   }, []);
 
   const handleAbaterVenda = async (vendaId, valorAbate) => {
-    const venda = vendasPendentes.find((venda) => venda.id === vendaId); // Buscando no estado correto
+    const venda = vendasPendentes.find((venda) => venda.id === vendaId);
     if (!venda) {
       console.error('Venda não encontrada');
       return;
@@ -39,27 +41,24 @@ const AbaterVenda = () => {
       return;
     }
 
-    // Adicionar o valor abatido sem alterar o valor original da venda
     const vendaAtualizada = {
       ...venda,
-      valorAbatido: (venda.valorAbatido || 0) + valorAbate, // Atualiza o valor abatido
+      valorAbatido: (venda.valorAbatido || 0) + valorAbate,
       status: (venda.valorAbatido || 0) + valorAbate >= venda.valor ? 'Efetuado' : 'Pendente',
     };
 
     try {
-      // Atualize a venda no banco de dados com o novo valor abatido
       await atualizarVendaNoFirebase(vendaAtualizada);
 
       setSnackbarSeverity('success');
       setSnackbarMessage('Abate realizado com sucesso!');
       setOpenSnackbar(true);
 
-      // Atualiza as vendas pendentes no estado sem remover a venda incorretamente
       setVendasPendentes((prevVendas) =>
         prevVendas.map((v) => (v.id === vendaId ? vendaAtualizada : v))
       );
 
-      setSelectedVenda(null); // Fecha o modal após sucesso
+      setSelectedVenda(null);
     } catch (error) {
       console.error('Erro ao realizar abate:', error);
       setSnackbarSeverity('error');
@@ -68,21 +67,18 @@ const AbaterVenda = () => {
     }
   };
 
-  // Abrir o modal de abate
   const handleOpenDialog = (venda) => {
     setSelectedVenda(venda);
-    setValorAbatido(''); // Limpa o campo de valor ao abrir o modal
+    setValorAbatido('');
     setError('');
   };
 
-  // Fechar o modal de abate
   const handleCloseDialog = () => {
     setSelectedVenda(null);
     setValorAbatido('');
     setError('');
   };
 
-  // Validação de entrada no campo de abate
   const handleValorAbatidoChange = (e) => {
     const value = parseFloat(e.target.value);
     const valorRestante = selectedVenda?.valor - (selectedVenda?.valorAbatido || 0);
@@ -96,13 +92,62 @@ const AbaterVenda = () => {
     }
   };
 
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleSortChange = (e) => {
+    setSortOption(e.target.value);
+  };
+
+  // Função de filtragem e ordenação
+  const filteredAndSortedVendas = vendasPendentes
+    .filter((venda) =>
+      venda.clienteId.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (sortOption === 'maiorValor') {
+        return b.valor - a.valor;
+      } else if (sortOption === 'menorValor') {
+        return a.valor - b.valor;
+      } else if (sortOption === 'alfabetico') {
+        return a.clienteId.localeCompare(b.clienteId);
+      }
+      return 0; // Sem ordenação
+    });
+
   return (
-    <div style={{ padding: 20 }}>
+    <Box sx={{ padding: 2 }}>
       <Typography variant="h4" gutterBottom>ABATER VENDA</Typography>
       {error && <Typography variant="body1" color="error">{error}</Typography>}
 
+      {/* Caixa de busca */}
+      <TextField
+        label="Buscar Cliente"
+        variant="outlined"
+        value={searchTerm}
+        onChange={handleSearchChange}
+        fullWidth
+        sx={{ mb: 2 }}
+      />
+
+      {/* Filtro de ordenação */}
+      <FormControl fullWidth sx={{ mb: 2 }}>
+        <InputLabel>Ordenar por</InputLabel>
+        <Select
+          value={sortOption}
+          onChange={handleSortChange}
+          label="Ordenar por"
+        >
+          <MenuItem value="">Nenhuma Ordenação</MenuItem>
+          <MenuItem value="maiorValor">Maior Valor</MenuItem>
+          <MenuItem value="menorValor">Menor Valor</MenuItem>
+          <MenuItem value="alfabetico">Ordem Alfabética</MenuItem>
+        </Select>
+      </FormControl>
+
       {/* Tabela de vendas pendentes */}
-      <TableContainer>
+      <TableContainer sx={{ maxWidth: '100%' }}>
         <Table>
           <TableHead>
             <TableRow>
@@ -115,8 +160,8 @@ const AbaterVenda = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {vendasPendentes.length > 0 ? (
-              vendasPendentes.map((venda) => (
+            {filteredAndSortedVendas.length > 0 ? (
+              filteredAndSortedVendas.map((venda) => (
                 <TableRow key={venda.id}>
                   <TableCell>{venda.clienteId}</TableCell>
                   <TableCell>{venda.produto}</TableCell>
@@ -127,7 +172,7 @@ const AbaterVenda = () => {
                     <Button
                       variant="outlined"
                       color="secondary"
-                      onClick={() => handleOpenDialog(venda)} // Abre o modal para abater
+                      onClick={() => handleOpenDialog(venda)}
                       disabled={venda.status === 'Efetuado'}
                     >
                       ABATER
@@ -164,11 +209,11 @@ const AbaterVenda = () => {
             label="Valor do Abate"
             type="number"
             value={valorAbatido}
-            onChange={handleValorAbatidoChange} // Validação do valor
+            onChange={handleValorAbatidoChange}
             error={!!error}
             helperText={error || 'Digite um valor positivo até o valor restante'}
             fullWidth
-            style={{ marginTop: 20 }}
+            sx={{ mt: 2 }}
           />
         </DialogContent>
         <DialogActions>
@@ -178,7 +223,7 @@ const AbaterVenda = () => {
           <Button
             onClick={() => handleAbaterVenda(selectedVenda.id, parseFloat(valorAbatido))}
             color="secondary"
-            disabled={!valorAbatido || valorAbatido <= 0} // Desabilita o botão se o valor for inválido
+            disabled={!valorAbatido || valorAbatido <= 0}
           >
             CONFIRMAR ABATE
           </Button>
@@ -195,7 +240,7 @@ const AbaterVenda = () => {
           {snackbarMessage}
         </Alert>
       </Snackbar>
-    </div>
+    </Box>
   );
 };
 

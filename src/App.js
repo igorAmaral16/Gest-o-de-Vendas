@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CssBaseline, Box, Grid } from '@mui/material';  // Importando Box e Grid para layout responsivo
+import { CssBaseline, Box, Grid } from '@mui/material';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import RegistrarVenda from './pages/RegistrarVenda';
@@ -26,6 +26,23 @@ const App = () => {
             xl: 1920, // Para desktops grandes
           },
         },
+        components: {
+          MuiCssBaseline: {
+            styleOverrides: {
+              html: {
+                width: '100%',
+                height: '100%',
+                overflowX: 'hidden', // Impede o overflow horizontal
+              },
+              body: {
+                margin: 0,
+                padding: 0,
+                width: '100%',
+                height: '100%',
+              },
+            },
+          },
+        },
       }),
     [isDarkMode]
   );
@@ -41,18 +58,15 @@ const App = () => {
         <Navbar toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
         
         <Box sx={{ width: '100%', padding: 2 }}>
-          <Grid container spacing={3} justifyContent="center">
-            <Grid item xs={12} sm={8} md={6} lg={4}>
+          <Grid container spacing={2} justifyContent="center">
+            <Grid item xs={12} sm={10} md={8} lg={6}>
               <Routes>
-                {/* Rota da Home */}
+                {/* A rota "/" leva à tela Home */}
                 <Route path="/" element={<Home />} />
 
-                {/* Rota de Registrar Venda */}
+                {/* Outras rotas do sistema */}
                 <Route path="/registrar-venda" element={<RegistrarVenda />} />
-
-                {/* Rota para Abater Venda */}
                 <Route path="/abater-venda" element={<AbaterVenda />} />
-
                 <Route path="/mostrar-vendas" element={<MostrarVendas />} />
               </Routes>
             </Grid>

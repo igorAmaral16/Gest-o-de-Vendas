@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/Gest-o-de-Vendas/static/css/main.e6c13ad2.css",
-    "main.js": "/Gest-o-de-Vendas/static/js/main.b7ae73fc.js",
+    "main.js": "/Gest-o-de-Vendas/static/js/main.751c212f.js",
     "static/js/488.9c92ff38.chunk.js": "/Gest-o-de-Vendas/static/js/488.9c92ff38.chunk.js",
     "index.html": "/Gest-o-de-Vendas/index.html",
     "main.e6c13ad2.css.map": "/Gest-o-de-Vendas/static/css/main.e6c13ad2.css.map",
-    "main.b7ae73fc.js.map": "/Gest-o-de-Vendas/static/js/main.b7ae73fc.js.map",
+    "main.751c212f.js.map": "/Gest-o-de-Vendas/static/js/main.751c212f.js.map",
     "488.9c92ff38.chunk.js.map": "/Gest-o-de-Vendas/static/js/488.9c92ff38.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.e6c13ad2.css",
-    "static/js/main.b7ae73fc.js"
+    "static/js/main.751c212f.js"
   ]
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Select, MenuItem, FormControl, InputLabel } from '@mui/material';
+import { Button, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Select, MenuItem, FormControl, InputLabel, Grid, Box } from '@mui/material';
 import { obterVendasEfetuadas } from '../firebase/firebaseService'; // Certifique-se de que a função está importada corretamente
 
 const MostrarVendas = () => {
@@ -40,45 +40,54 @@ const MostrarVendas = () => {
   }, [status, orderBy, orderDirection]); // Recarrega as vendas sempre que o status, orderBy ou orderDirection forem alterados
 
   return (
-    <div style={{ padding: 20 }}>
+    <Box sx={{ padding: 2 }}>
       <Typography variant="h4" gutterBottom>Mostrar Vendas</Typography>
       {error && <Typography variant="body1" color="error">{error}</Typography>}
 
-      {/* Filtros para alternar entre pendentes e efetuadas */}
-      <Button
-        variant={status === 'efetuado' ? 'contained' : 'outlined'}
-        color="secondary"
-        onClick={() => setStatus('efetuado')}
-      >
-        Vendas Efetuadas
-      </Button>
+      <Grid container spacing={2} alignItems="center">
+        {/* Filtros para alternar entre pendentes e efetuadas */}
+        <Grid item xs={12} sm={4}>
+          <Button
+            variant={status === 'efetuado' ? 'contained' : 'outlined'}
+            color="secondary"
+            onClick={() => setStatus('efetuado')}
+            fullWidth
+          >
+            Vendas Efetuadas
+          </Button>
+        </Grid>
 
-      {/* Filtros para ordenação */}
-      <FormControl style={{ margin: '10px' }}>
-        <InputLabel>Ordenar por</InputLabel>
-        <Select
-          value={orderBy}
-          onChange={(e) => setOrderBy(e.target.value)}
-          label="Ordenar por"
-        >
-          <MenuItem value="data">Data</MenuItem>
-          <MenuItem value="valor">Valor</MenuItem>
-        </Select>
-      </FormControl>
+        {/* Filtros para ordenação */}
+        <Grid item xs={12} sm={4}>
+          <FormControl fullWidth>
+            <InputLabel>Ordenar por</InputLabel>
+            <Select
+              value={orderBy}
+              onChange={(e) => setOrderBy(e.target.value)}
+              label="Ordenar por"
+            >
+              <MenuItem value="data">Data</MenuItem>
+              <MenuItem value="valor">Valor</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
 
-      <FormControl style={{ margin: '10px' }}>
-        <InputLabel>Direção</InputLabel>
-        <Select
-          value={orderDirection}
-          onChange={(e) => setOrderDirection(e.target.value)}
-          label="Direção"
-        >
-          <MenuItem value="desc">Decrescente</MenuItem>
-          <MenuItem value="asc">Crescente</MenuItem>
-        </Select>
-      </FormControl>
+        <Grid item xs={12} sm={4}>
+          <FormControl fullWidth>
+            <InputLabel>Direção</InputLabel>
+            <Select
+              value={orderDirection}
+              onChange={(e) => setOrderDirection(e.target.value)}
+              label="Direção"
+            >
+              <MenuItem value="desc">Decrescente</MenuItem>
+              <MenuItem value="asc">Crescente</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+      </Grid>
 
-      <TableContainer>
+      <TableContainer sx={{ marginTop: 2 }}>
         <Table>
           <TableHead>
             <TableRow>
@@ -108,7 +117,7 @@ const MostrarVendas = () => {
           </TableBody>
         </Table>
       </TableContainer>
-    </div>
+    </Box>
   );
 };
 
